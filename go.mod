@@ -1,4 +1,4 @@
-module go-bitbucket
+module github.com/doublestraus/go-bitbucket
 
 go 1.17
 
