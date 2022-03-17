@@ -5,10 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/valyala/fasthttp"
 	"io"
 	"net/url"
 	"strings"
+	"time"
+
+	"github.com/sirupsen/logrus"
+	"github.com/valyala/fasthttp"
 )
 
 type Client struct {
@@ -35,7 +38,7 @@ func (e Errors) Error() string {
 	return errorStr
 }
 
-func New(token, baseUrl string) *Client {
+func New(token, baseUrl string, options ...BClientOptionsFunc) *Client {
 	setupUrl := ""
 	if strings.HasPrefix(baseUrl, "https://") {
 		setupUrl = baseUrl
@@ -47,10 +50,35 @@ func New(token, baseUrl string) *Client {
 	} else {
 		setupUrl = setupUrl + "/rest/api/1.0/"
 	}
-	return &Client{
+	client := &Client{
 		token:      fmt.Sprintf("Bearer %s", token),
 		baseUrl:    setupUrl,
 		httpClient: new(fasthttp.Client),
+	}
+	for _, fn := range options {
+		if fn != nil {
+			err := fn(client)
+			if err != nil {
+				logrus.Error(err)
+			}
+		}
+	}
+	return client
+}
+
+type BClientOptionsFunc func(*Client) error
+
+func withMaxConnections(maxCons int) BClientOptionsFunc {
+	return func(c *Client) error {
+		c.httpClient.MaxConnsPerHost = maxCons
+		return nil
+	}
+}
+
+func withMaxTimeoutWait(maxTimeout time.Duration) BClientOptionsFunc {
+	return func(c *Client) error {
+		c.httpClient.MaxConnWaitTimeout = maxTimeout
+		return nil
 	}
 }
 
