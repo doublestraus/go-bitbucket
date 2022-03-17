@@ -68,14 +68,14 @@ func New(token, baseUrl string, options ...BClientOptionsFunc) *Client {
 
 type BClientOptionsFunc func(*Client) error
 
-func withMaxConnections(maxCons int) BClientOptionsFunc {
+func WithMaxConnections(maxCons int) BClientOptionsFunc {
 	return func(c *Client) error {
 		c.httpClient.MaxConnsPerHost = maxCons
 		return nil
 	}
 }
 
-func withMaxTimeoutWait(maxTimeout time.Duration) BClientOptionsFunc {
+func WithMaxTimeoutWait(maxTimeout time.Duration) BClientOptionsFunc {
 	return func(c *Client) error {
 		c.httpClient.MaxConnWaitTimeout = maxTimeout
 		return nil
