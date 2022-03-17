@@ -3,12 +3,31 @@ package bitbucket
 import (
 	"os"
 	"testing"
+	"time"
 )
 
 func createClient() *Client {
 	token := os.Getenv("BB_TOKEN")
 	url := os.Getenv("BB_URL")
 	return New(token, url)
+}
+
+func createMaxConnClient(maxConns int) *Client {
+	token := os.Getenv("BB_TOKEN")
+	url := os.Getenv("BB_URL")
+	return New(token, url, withMaxConnections(maxConns))
+}
+
+func createMaxWaitConnClient(maxWaitTimout time.Duration) *Client {
+	token := os.Getenv("BB_TOKEN")
+	url := os.Getenv("BB_URL")
+	return New(token, url, withMaxTimeoutWait(maxWaitTimout))
+}
+
+func ceateMaxConnMaxWaitClient(maxConns int, maxWaitTimeout time.Duration) *Client {
+	token := os.Getenv("BB_TOKEN")
+	url := os.Getenv("BB_URL")
+	return New(token, url, withMaxConnections(maxConns), withMaxTimeoutWait(maxWaitTimeout))
 }
 
 func TestClient_Repos(t *testing.T) {
@@ -33,7 +52,7 @@ func TestClient_Repos(t *testing.T) {
 
 func TestClient_GetNonExistentProject(t *testing.T) {
 	projectName := os.Getenv("BB_PROJECTNAME")
-	client := createClient()
+	client := createMaxConnClient(10)
 	_, err := client.GetProject(projectName)
 	if err, ok := err.(Errors); ok {
 		if err.StatusCode != 404 {
@@ -68,7 +87,7 @@ func TestClient_GetProjectRepos(t *testing.T) {
 }
 
 func TestClient_GetProjectsReposFiles(t *testing.T) {
-	client := createClient()
+	client := createMaxWaitConnClient(5 * time.Minute)
 	pagination := DefaultPagination()
 	filter := &ProjectReposFileFilter{}
 	projectName := os.Getenv("BB_PROJECTNAME")
@@ -101,7 +120,7 @@ func TestClient_GetProjectsReposFileRaw(t *testing.T) {
 }
 
 func TestClient_GetProjectsReposCommits(t *testing.T) {
-	client := createClient()
+	client := ceateMaxConnMaxWaitClient(15, 5*time.Minute)
 	pagination := DefaultPagination()
 	projectName := os.Getenv("BB_PROJECTNAME")
 	repoSlug := os.Getenv("BB_REPOSLUG")
