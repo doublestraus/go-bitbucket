@@ -138,13 +138,17 @@ func (c *Client) do(method, path string, start, limit int, filter map[string]int
 		reqUri.WriteString(fmt.Sprintf("%s%s?", c.baseUrl, path))
 		for k, v := range filter {
 			if vStr, ok := v.(string); ok {
-				reqUri.WriteString(fmt.Sprintf("%s=%s&", k, url.QueryEscape(vStr)))
+				if len(vStr) > 0 {
+					reqUri.WriteString(fmt.Sprintf("%s=%s&", k, url.QueryEscape(vStr)))
+				}
 			} else {
 				tt := reflect.TypeOf(v)
 				stype := reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
 				if tt.Implements(stype) {
 					vStr = (v.(fmt.Stringer)).String()
-					reqUri.WriteString(fmt.Sprintf("%s=%s&", k, url.QueryEscape(vStr)))
+					if len(vStr) > 0 {
+						reqUri.WriteString(fmt.Sprintf("%s=%s&", k, url.QueryEscape(vStr)))
+					}
 				} else {
 					var vStr string
 					switch t := v.(type) {
@@ -159,7 +163,9 @@ func (c *Client) do(method, path string, start, limit int, filter map[string]int
 					default:
 						panic("cannot format")
 					}
-					reqUri.WriteString(fmt.Sprintf("%s=%s&", k, url.QueryEscape(vStr)))
+					if len(vStr) > 0 {
+						reqUri.WriteString(fmt.Sprintf("%s=%s&", k, url.QueryEscape(vStr)))
+					}
 				}
 			}
 		}

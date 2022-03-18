@@ -78,12 +78,12 @@ func (c *Client) GetProjectsReposFiles(projectKey string, repoSlug string, pagin
 	return fileList, nil
 }
 
-func (c *Client) GetProjectsReposFileRaw(projectKey string, repoSlug string, path string) ([]byte, error) {
+func (c *Client) GetProjectsReposFileRaw(projectKey string, repoSlug string, path string, filter *ProjectReposFileFilter) ([]byte, error) {
 	body, err := c.get(fmt.Sprintf("projects/%s/repos/%s/raw/%s",
 		url.QueryEscape(projectKey),
 		url.QueryEscape(repoSlug),
 		url.QueryEscape(path)),
-		DefaultPagination(), nil)
+		DefaultPagination(), structs.Map(filter))
 	if err != nil {
 		return nil, err
 	}
@@ -140,8 +140,4 @@ func (c *Client) GetProjectsReposBranchesDefault(projectKey string, repoSlug str
 		return nil, err
 	}
 	return &branch, nil
-}
-
-func (p *Projects) New() {
-	panic("Not implemented")
 }

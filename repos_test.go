@@ -110,7 +110,8 @@ func TestClient_GetProjectsReposFileRaw(t *testing.T) {
 	projectName := os.Getenv("BB_PROJECTNAME")
 	repoSlug := os.Getenv("BB_REPOSLUG")
 	fileName := os.Getenv("BB_FILENAME")
-	content, err := client.GetProjectsReposFileRaw(projectName, repoSlug, fileName)
+	filter := &ProjectReposFileFilter{}
+	content, err := client.GetProjectsReposFileRaw(projectName, repoSlug, fileName, filter)
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -169,5 +170,7 @@ func TestClient_GetProjectsReposBranches(t *testing.T) {
 		}
 		pagination.Start = pagination.NextPageStart
 	}
-	t.Log(branches)
+	for _, b := range branches {
+		t.Log(b.Id)
+	}
 }
