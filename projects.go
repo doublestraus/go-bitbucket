@@ -3,8 +3,9 @@ package bitbucket
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/fatih/structs"
 	"net/url"
+
+	"github.com/fatih/structs"
 )
 
 type Projects struct {
@@ -106,6 +107,39 @@ func (c *Client) GetProjectsReposCommits(projectKey string, repoSlug string, pag
 		commitList = append(commitList, &repo)
 	}
 	return commitList, nil
+}
+
+func (c *Client) GetProjectsReposBranches(projectKey string, repoSlig string, pagination *Pagination, filter *ProjectReposBranchesFilter) ([]*Branch, error) {
+	body, err := c.get(fmt.Sprintf("projects/%s/repos/%s/branches", url.QueryEscape(projectKey), url.QueryEscape(repoSlig)),
+		pagination,
+		structs.Map(filter))
+	if err != nil {
+		return nil, err
+	}
+	var answer Answer
+	err = json.Unmarshal(body, &answer)
+	fillPagination(&answer, pagination)
+	branchList := make([]*Branch, 0)
+	for _, v := range answer.Values {
+		var branch Branch
+		m2s(v, &branch)
+		branchList = append(branchList, &branch)
+	}
+	return branchList, nil
+}
+
+func (c *Client) GetProjectsReposBranchesDefault(projectKey string, repoSlug string, pagination *Pagination) (*Branch, error) {
+	body, err := c.get(fmt.Sprintf("projects/%s/repos/%s/branches/default", url.QueryEscape(projectKey), url.QueryEscape(repoSlug)),
+		pagination, nil)
+	if err != nil {
+		return nil, err
+	}
+	var branch Branch
+	err = json.Unmarshal(body, &branch)
+	if err != nil {
+		return nil, err
+	}
+	return &branch, nil
 }
 
 func (p *Projects) New() {
