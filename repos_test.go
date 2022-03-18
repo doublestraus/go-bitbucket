@@ -15,19 +15,19 @@ func createClient() *Client {
 func createMaxConnClient(maxConns int) *Client {
 	token := os.Getenv("BB_TOKEN")
 	url := os.Getenv("BB_URL")
-	return New(token, url, withMaxConnections(maxConns))
+	return New(token, url, WithMaxConnections(maxConns))
 }
 
 func createMaxWaitConnClient(maxWaitTimout time.Duration) *Client {
 	token := os.Getenv("BB_TOKEN")
 	url := os.Getenv("BB_URL")
-	return New(token, url, withMaxTimeoutWait(maxWaitTimout))
+	return New(token, url, WithMaxTimeoutWait(maxWaitTimout))
 }
 
 func ceateMaxConnMaxWaitClient(maxConns int, maxWaitTimeout time.Duration) *Client {
 	token := os.Getenv("BB_TOKEN")
 	url := os.Getenv("BB_URL")
-	return New(token, url, withMaxConnections(maxConns), withMaxTimeoutWait(maxWaitTimeout))
+	return New(token, url, WithMaxConnections(maxConns), WithMaxTimeoutWait(maxWaitTimeout))
 }
 
 func TestClient_Repos(t *testing.T) {
