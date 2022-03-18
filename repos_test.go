@@ -133,3 +133,41 @@ func TestClient_GetProjectsReposCommits(t *testing.T) {
 	commits = append(commits, cms...)
 
 }
+
+func TestClient_GetProjectsReposBranchesDefault(t *testing.T) {
+	client := createClient()
+	pagination := DefaultPagination()
+	projectName := os.Getenv("BB_PROJECTNAME")
+	repoSlug := os.Getenv("BB_REPOSLUG")
+	defaultBranch, err := client.GetProjectsReposBranchesDefault(projectName, repoSlug, pagination)
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	if !defaultBranch.IsDefault {
+		t.Fail()
+	}
+	t.Log(defaultBranch)
+}
+
+func TestClient_GetProjectsReposBranches(t *testing.T) {
+	client := createClient()
+	pagination := DefaultPagination()
+	projectName := os.Getenv("BB_PROJECTNAME")
+	repoSlug := os.Getenv("BB_REPOSLUG")
+	branches := make([]*Branch, 0)
+	filter := ProjectReposBranchesFilter{}
+	for {
+		b, err := client.GetProjectsReposBranches(projectName, repoSlug, pagination, &filter)
+		if err != nil {
+			t.Log(err)
+			t.Fail()
+		}
+		branches = append(branches, b...)
+		if pagination.IsLastPage {
+			break
+		}
+		pagination.Start = pagination.NextPageStart
+	}
+	t.Log(branches)
+}
