@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -135,7 +137,31 @@ func (c *Client) do(method, path string, start, limit int, filter map[string]int
 		reqUri := new(strings.Builder)
 		reqUri.WriteString(fmt.Sprintf("%s%s?", c.baseUrl, path))
 		for k, v := range filter {
-			reqUri.WriteString(fmt.Sprintf("%s=%s&", k, url.QueryEscape(v.(string))))
+			if vStr, ok := v.(string); ok {
+				reqUri.WriteString(fmt.Sprintf("%s=%s&", k, url.QueryEscape(vStr)))
+			} else {
+				tt := reflect.TypeOf(v)
+				stype := reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
+				if tt.Implements(stype) {
+					vStr = (v.(fmt.Stringer)).String()
+					reqUri.WriteString(fmt.Sprintf("%s=%s&", k, url.QueryEscape(vStr)))
+				} else {
+					var vStr string
+					switch t := v.(type) {
+					case int:
+					case int64:
+						vStr = strconv.FormatInt(t, 10)
+					case uint:
+					case uint64:
+						vStr = strconv.FormatUint(t, 10)
+					case bool:
+						vStr = strconv.FormatBool(t)
+					default:
+						panic("cannot format")
+					}
+					reqUri.WriteString(fmt.Sprintf("%s=%s&", k, url.QueryEscape(vStr)))
+				}
+			}
 		}
 		reqUri.WriteString(fmt.Sprintf("start=%d&limit=%d", start, limit))
 		req.SetRequestURI(reqUri.String())
