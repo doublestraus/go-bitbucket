@@ -120,6 +120,20 @@ func TestClient_GetProjectsReposFileRaw(t *testing.T) {
 	}
 }
 
+func TestClient_GetProjectsReposCommit(t *testing.T) {
+	client := createClient()
+	projectName := os.Getenv("BB_PROJECTNAME")
+	repoSlug := os.Getenv("BB_REPOSLUG")
+	commitId := os.Getenv("BB_COMMIT")
+	commit, err := client.GetProjectReposCommit(projectName, repoSlug, commitId)
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	} else {
+		t.Logf("%v", commit)
+	}
+}
+
 func TestClient_GetProjectsReposCommits(t *testing.T) {
 	client := ceateMaxConnMaxWaitClient(15, 5*time.Minute)
 	pagination := DefaultPagination()

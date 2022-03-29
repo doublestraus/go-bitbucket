@@ -109,8 +109,23 @@ func (c *Client) GetProjectsReposCommits(projectKey string, repoSlug string, pag
 	return commitList, nil
 }
 
-func (c *Client) GetProjectsReposBranches(projectKey string, repoSlig string, pagination *Pagination, filter *ProjectReposBranchesFilter) ([]*Branch, error) {
-	body, err := c.get(fmt.Sprintf("projects/%s/repos/%s/branches", url.QueryEscape(projectKey), url.QueryEscape(repoSlig)),
+func (c *Client) GetProjectReposCommit(projectKey, repoSlug, commitId string) (*Commit, error) {
+	body, err := c.get(fmt.Sprintf("projects/%s/repos/%s/commits/%s", url.QueryEscape(projectKey), url.QueryEscape(repoSlug), url.QueryEscape(commitId)),
+		DefaultPagination(), nil)
+	if err != nil {
+		return nil, err
+	}
+	var commit Commit
+	err = json.Unmarshal(body, &commit)
+	if err != nil {
+		return nil, err
+	}
+	return &commit, nil
+
+}
+
+func (c *Client) GetProjectsReposBranches(projectKey string, repoSlug string, pagination *Pagination, filter *ProjectReposBranchesFilter) ([]*Branch, error) {
+	body, err := c.get(fmt.Sprintf("projects/%s/repos/%s/branches", url.QueryEscape(projectKey), url.QueryEscape(repoSlug)),
 		pagination,
 		structs.Map(filter))
 	if err != nil {
